@@ -166,7 +166,7 @@ func composeIssueMessage(issue *Issue, doer *User, tplName base.TplName, tos []s
 	}
 
 	email:=setting.MailService.From
-	if ( strings.Contains(email,"<") && strings.Contains(email,">"){
+	if ( strings.Contains(email,"<") && strings.Contains(email,">") ){
 		email = email [strings.Index(email,"<")+1:strings.LastIndex(email,">")]
 	}
 	
