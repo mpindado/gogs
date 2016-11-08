@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"html/template"
 	"path"
+	"strings"
 
 	"gopkg.in/gomail.v2"
 	"gopkg.in/macaron.v1"
@@ -151,6 +152,9 @@ func composeTplData(subject, body, link string) map[string]interface{} {
 	return data
 }
 
+//mpindado: setting.MailService.User is used for authenticating to the smtp server thus, cannot use this value
+//as a valid email. Instead use setting.MailService.From. But this value may contain From data also ("My gogs server<...@...>")
+//So use the From value but extracting the email between <>
 func composeIssueMessage(issue *Issue, doer *User, tplName base.TplName, tos []string, info string) *mailer.Message {
 	subject := issue.MailSubject()
 	body := string(markdown.RenderSpecialLink([]byte(issue.Content), issue.Repo.HTMLURL(), issue.Repo.ComposeMetas()))
@@ -160,7 +164,13 @@ func composeIssueMessage(issue *Issue, doer *User, tplName base.TplName, tos []s
 	if err != nil {
 		log.Error(3, "HTMLString (%s): %v", tplName, err)
 	}
-	msg := mailer.NewMessageFrom(tos, fmt.Sprintf(`"%s" <%s>`, doer.DisplayName(), setting.MailService.User), subject, content)
+
+	email:=setting.MailService.From
+	if ( strings.Contains(email,"<") && strings.Contains(email,">"){
+		email = email [strings.Index(email,"<")+1:strings.LastIndex(email,">")]
+	}
+	
+	msg := mailer.NewMessageFrom(tos, fmt.Sprintf(`"%s" <%s>`, doer.DisplayName(), email), subject, content)
 	msg.Info = fmt.Sprintf("Subject: %s, %s", subject, info)
 	return msg
 }
