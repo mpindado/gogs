@@ -1,3 +1,7 @@
+Gogs fixes:
+- SMTP server without password (e.g. Active Directory)
+
+
 Crosscompile for Windows in linux environment:
 - Create user gogs with home
 - Download GO to avoid interfering with system's GO
